@@ -41,29 +41,40 @@ var app = express.createServer(express.logger());
 app.get('/', function(request, response) {
 	// retrieve the file from Hadoop
 	// hardcoded path: https://s3-eu-west-1.amazonaws.com/mrdata/output-hps/part-r-00000
-	uri = "https://s3-eu-west-1.amazonaws.com/mrdata/output-hps/part-r-00000";
-	urlParts = url.parse(uri);
+	//uri = "https://s3-eu-west-1.amazonaws.com/mrdata/output-hps/part-r-00000";
 	
-	http.get({host: urlParts.host, path: urlParts.pathname }, function(res) {
-		// placeholder for the data read from the remote server
-		data = "";
-		
-		res.on('data', function(chunk) {
-			// accumulate the data as it is received
-			data += chunk;
-		});
-		res.on('end', function() {
-			// when all data has been received...
-			fs.readFile(actions[0].template, function(err, template) {
-		        response.writeHead(200, {'Content-Type': 'text/html'});
-				template = template.toString();								
-				actions[0].view['content'] = parseData(data);
-				actions[0].view['filename'] = urlParts.pathname;
-				response.write(M.to_html(template, actions[0].view));
-				response.end()
-		   })			
-		});
-	});  
+	if(request.query.file == undefined) {
+		response.write("Please provide the URL of a remote resource");
+		response.end();
+	}
+	else {
+		urlParts = url.parse(request.query.file);
+
+		http.get({host: urlParts.host, path: urlParts.pathname }, function(res) {
+			// placeholder for the data read from the remote server
+			data = "";
+
+			res.on('data', function(chunk) {
+				// accumulate the data as it is received
+				data += chunk;
+			});
+			res.on('end', function() {
+				// when all data has been received...
+				fs.readFile(actions[0].template, function(err, template) {
+			        response.writeHead(200, {'Content-Type': 'text/html'});
+					template = template.toString();								
+					actions[0].view['content'] = parseData(data);
+					actions[0].view['filename'] = urlParts.pathname;
+					response.write(M.to_html(template, actions[0].view));
+					response.end()
+			   })			
+			});
+		}).on('error', function(error) {
+			sys.log("There was an error loading the file");
+			response.write("The remote resource does not exist or it cannot be reached");
+			response.end();
+		});		
+	}	  
 });
 
 var port = process.env.PORT || 8080;
