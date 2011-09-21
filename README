@@ -1,1 +1,21 @@
 Simple parser of Hadoop key-value files that outputs the results in a chart built with the JS library Raphael.
+
+The file format is very specific and should look like:
+
+	2011-09-15<space>15:07:03<tab>41
+
+Where the numeric key is the number of hits in that specific timestamp (basically, hits per second). The application requires parameter "file" in the URL, pointing to an HTTP resource with the correct format:
+
+	http://.../?file=http://yourlogserver/files/part-r-0000
+
+In the context where this tool is used, these files are part of the output of a Hadoop MapReduce job.
+
+To run the application:
+
+	node web.js
+	
+Or: 
+
+	foreman start
+	
+The application can be readily deployed to Heroku.
