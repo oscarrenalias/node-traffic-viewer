@@ -39,10 +39,6 @@ var parseData = function(text) {
 var app = express.createServer(express.logger());
 
 app.get('/', function(request, response) {
-	// retrieve the file from Hadoop
-	// hardcoded path: https://s3-eu-west-1.amazonaws.com/mrdata/output-hps/part-r-00000
-	//uri = "https://s3-eu-west-1.amazonaws.com/mrdata/output-hps/part-r-00000";
-	
 	if(request.query.file == undefined) {
 		response.write("Please provide the URL of a remote resource");
 		response.end();
@@ -50,6 +46,7 @@ app.get('/', function(request, response) {
 	else {
 		urlParts = url.parse(request.query.file);
 
+		// retrieve the file from an S3 bucket containing a file in our specific format
 		http.get({host: urlParts.host, path: urlParts.pathname }, function(res) {
 			// placeholder for the data read from the remote server
 			data = "";
