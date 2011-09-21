@@ -1,0 +1,1 @@
+Simple parser of Hadoop key-value files that outputs the results in a chart built with the JS library Raphael.
